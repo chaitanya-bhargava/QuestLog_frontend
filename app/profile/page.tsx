@@ -11,9 +11,33 @@ const ProfilePage = () => {
 
   //dummy
   const games = {
-    played: [{ id: 1, name: "Grand Theft Auto 5" }],
-    currentlyPlaying: [{ id: 2, name: "Red Dead Redemption 2" }],
-    wantToPlay: [{ id: 3, name: "Hollow Knight" }],
+    played: [
+      {
+        id: 1,
+        name: 'Grand Theft Auto V',
+        image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg',
+        genre: 'Action-Adventure',
+        releaseDate: '2013-09-17',
+      },
+    ],
+    currentlyPlaying: [
+      {
+        id: 2,
+        name: 'Red Dead Redemption 2',
+        image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg',
+        genre: 'Action-Adventure',
+        releaseDate: '2018-10-26',
+      },
+    ],
+    wantToPlay: [
+      {
+        id: 3,
+        name: 'Hollow Knight',
+        image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg',
+        genre: 'Metroidvania',
+        releaseDate: '2017-02-24',
+      },
+    ],
   };
 
   return (

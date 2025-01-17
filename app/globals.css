@@ -4,6 +4,8 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 @layer base {

@@ -3,10 +3,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import GameCard from "./GameCard";
 
 type Game = {
   id: number;
   name: string;
+  image: string;
+  genre: string;
+  releaseDate: string;
 };
 
 type AvatarDropdownProps = {
@@ -37,7 +41,7 @@ const AvatarDropdown = ({ title, games }: AvatarDropdownProps) => {
           <ul className="space-y-2">
             {games.map((game) => (
               <li key={game.id} className="text-gray-700">
-                {game.name}
+                <GameCard game={game} />
               </li>
             ))}
           </ul>

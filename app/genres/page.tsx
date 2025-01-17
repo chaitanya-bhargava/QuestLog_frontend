@@ -1,42 +1,34 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-//dummy
-const genres = [
-  "Action",
-  "Indie",
-  "Adventure",
-  "RPG",
-  "Strategy",
-  "Shooter",
-  "Casual",
-  "Simulation",
-  "Puzzle",
-  "Arcade",
-  "Platformer",
-  "Massively Multiplayer",
-  "Racing",
-  "Sports",
-  "Fighting",
-  "Family",
-  "Board Games",
-  "Educational",
-  "Card",
-];
+async function getGenres():Promise<Genre[]> {
+  const response = await fetch('http://localhost:8080/v1/genres');
+  const data = await response.json();
+  return data.data
+}
 
-const GenresPage = () => {
+type Genre = {
+  id: number,
+  name: string,
+  slug: string,
+}
+
+const GenresPage = async () => {
+
+  const genres = (await getGenres()).reverse()
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">All Genres</h1>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {genres.map((genre) => (
           <Link
-            key={genre}
-            href={`/games/${genre.toLowerCase().replace(/\s+/g, "-")}`}
+            key={genre.id}
+            href={`/games/${genre.slug}`}
             passHref
           >
             <Button variant="outline" className="w-full">
-              {genre}
+              {genre.name}
             </Button>
           </Link>
         ))}
