@@ -11,12 +11,12 @@ type Game = {
   released: string;
 };
 
-type GenrePageClientProps = {
+type SearchResultsClientProps = {
   initialData: {
     data: Game[];
     total: number;
   };
-  genre: string;
+  query: string;
 };
 
 const Loader = () => (
@@ -25,10 +25,10 @@ const Loader = () => (
   </div>
 );
 
-const GenrePageClient = ({
+const SearchResultsClient = ({
   initialData,
-  genre,
-}: GenrePageClientProps) => {
+  query,
+}: SearchResultsClientProps) => {
   const [games, setGames] = useState<Game[]>(initialData.data);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -43,7 +43,7 @@ const GenrePageClient = ({
 
     try {
       const response = await fetch(
-        `http://localhost:8080/v1/games?genre=${genre}&page=${pageRef.current}`
+        `http://localhost:8080/v1/search?query=${query}&page=${pageRef.current}`
       );
       const data = await response.json();
       if (data.data && data.data.length > 0) {
@@ -66,7 +66,8 @@ const GenrePageClient = ({
 
       scrollTimeoutRef.current = setTimeout(() => {
         const bottom =
-          window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+          window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 200;
         if (bottom && hasMore) {
           fetchMoreGames();
         }
@@ -84,15 +85,7 @@ const GenrePageClient = ({
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold capitalize mb-4">
-        {genre == "role-playing-games-rpg"
-          ? "RPG"
-          : genre == "board-games"
-          ? "Board Games"
-          : genre == "massively-multiplayer"
-          ? "Massively Multiplayer"
-          : genre}
-      </h1>
+      <h1 className="text-2xl font-bold capitalize mb-4">Search Results</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {games.map((game) => (
           <GameCard
@@ -100,7 +93,10 @@ const GenrePageClient = ({
             game={{
               id: game.id,
               name: game.name,
-              image: game.background_image=="" ? "https://github.com/shadcn.png" : game.background_image,
+              image:
+                game.background_image == ""
+                  ? "https://github.com/shadcn.png"
+                  : game.background_image,
               genres: game.genres,
               release_date: game.released,
             }}
@@ -117,4 +113,4 @@ const GenrePageClient = ({
   );
 };
 
-export default GenrePageClient;
+export default SearchResultsClient;

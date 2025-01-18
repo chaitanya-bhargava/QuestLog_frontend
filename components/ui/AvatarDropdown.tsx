@@ -9,8 +9,8 @@ type Game = {
   id: number;
   name: string;
   image: string;
-  genre: string;
-  releaseDate: string;
+  genres: { name: string }[];
+  release_date: string;
 };
 
 type AvatarDropdownProps = {
@@ -38,13 +38,23 @@ const AvatarDropdown = ({ title, games }: AvatarDropdownProps) => {
 
       {isOpen && (
         <div className="mt-2 pl-4">
-          <ul className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {games.map((game) => (
-              <li key={game.id} className="text-gray-700">
-                <GameCard game={game} />
-              </li>
+              <GameCard
+                key={game.id}
+                game={{
+                  id: game.id,
+                  name: game.name,
+                  image:
+                    game.image == ""
+                      ? "https://github.com/shadcn.png"
+                      : game.image,
+                  genres: game.genres,
+                  release_date: game.release_date,
+                }}
+              />
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

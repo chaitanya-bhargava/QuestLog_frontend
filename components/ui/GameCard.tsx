@@ -16,8 +16,8 @@ type Game = {
   id: number;
   name: string;
   image: string;
-  genre: string;
-  releaseDate: string;
+  genres: { name: string }[];
+  release_date: string;
 };
 
 type GameCardProps = {
@@ -104,11 +104,14 @@ const GameCard = ({ game }: GameCardProps) => {
         <div className="p-4 border-t">
           <div className="space-y-2">
             <p>
-              <span className="font-semibold">Genre:</span> {game.genre}
+            <span className="font-semibold">Genres:</span>
+            {game.genres.map((genre)=>{
+              return <span key={genre.name}>{" "+genre.name}</span>
+            })}
             </p>
             <p>
               <span className="font-semibold">Release Date:</span>{" "}
-              {format(game.releaseDate,"dd-MM-yyyy")}
+              {format(game.release_date,"dd-MM-yyyy")}
             </p>
           </div>
         </div>

@@ -1,77 +1,122 @@
+"use client"; // Mark this as a Client Component
+
+import { useEffect, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AvatarDropdown from "@/components/ui/AvatarDropdown";
+import ProtectedRoute from "@/components/ui/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext"; // Import the useAuth hook
+import axios from "axios";
+
+type Game = {
+  id: number;
+  name: string;
+  image: string;
+  genres: { name: string }[];
+  release_date: string;
+}
 
 const ProfilePage = () => {
-  //dummy
-  const user = {
-    name: "John Doe",
-    username: "johndoe123",
-    avatar: "https://github.com/shadcn.png", // Replace with actual avatar URL
-  };
+  const { user, loading: authLoading } = useAuth(); // Get user data from AuthContext
+  const [games, setGames] = useState<{
+    played: Game[];
+    currentlyPlaying: Game[];
+    wantToPlay: Game[];
+  }>({
+    played: [],
+    currentlyPlaying: [],
+    wantToPlay: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  //dummy
-  const games = {
-    played: [
-      {
-        id: 1,
-        name: 'Grand Theft Auto V',
-        image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg',
-        genre: 'Action-Adventure',
-        releaseDate: '2013-09-17',
-      },
-    ],
-    currentlyPlaying: [
-      {
-        id: 2,
-        name: 'Red Dead Redemption 2',
-        image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg',
-        genre: 'Action-Adventure',
-        releaseDate: '2018-10-26',
-      },
-    ],
-    wantToPlay: [
-      {
-        id: 3,
-        name: 'Hollow Knight',
-        image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg',
-        genre: 'Metroidvania',
-        releaseDate: '2017-02-24',
-      },
-    ],
-  };
+  useEffect(() => {
+    if (!user) return; // Don't fetch data if user is not available
+
+    const fetchGames = async () => {
+      try {
+        // Fetch games for each shelf
+        const [played, currentlyPlaying, wantToPlay] = await Promise.all([
+          axios.get(`http://localhost:8080/v1/games/gameLog?shelf=P`, {
+            headers: {
+              Authorization: `UserID ${user.id}`,
+            },
+          }),
+          axios.get(`http://localhost:8080/v1/games/gameLog?shelf=C`, {
+            headers: {
+              Authorization: `UserID ${user.id}`,
+            },
+          }),
+          axios.get(`http://localhost:8080/v1/games/gameLog?shelf=W`, {
+            headers: {
+              Authorization: `UserID ${user.id}`,
+            },
+          }),
+        ]);
+
+        setGames({
+          played: played.data,
+          currentlyPlaying: currentlyPlaying.data,
+          wantToPlay: wantToPlay.data,
+        });
+      } catch (err) {
+        setError("Failed to fetch games data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGames();
+  }, [user]);
+
+  if (authLoading) {
+    return <div>Loading user data...</div>; // Show a loading state while fetching user data
+  }
+
+  if (!user) {
+    return <div>No user data available</div>; // Fallback if user data is not available
+  }
+
+  if (loading) {
+    return <div>Loading games data...</div>; // Show a loading state while fetching games data
+  }
+
+  if (error) {
+    return <div>{error}</div>; // Show an error message if fetching fails
+  }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center space-x-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={user.avatar} alt={user.name} />
-          <AvatarFallback>{user.name[0]}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h1 className="text-2xl font-bold">{user.name}</h1>
-          <p className="text-gray-500">@{user.username}</p>
+    <ProtectedRoute>
+      <div className="p-8">
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={user.avatar_url} alt={user.name} />
+            <AvatarFallback>{user.name[0]}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-2xl font-bold">{user.name}</h1>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">My Games</h2>
+
+          <AvatarDropdown
+            title={`Played (${games.played.length})`}
+            games={games.played}
+          />
+
+          <AvatarDropdown
+            title={`Currently Playing (${games.currentlyPlaying.length})`}
+            games={games.currentlyPlaying}
+          />
+
+          <AvatarDropdown
+            title={`Want to Play (${games.wantToPlay.length})`}
+            games={games.wantToPlay}
+          />
         </div>
       </div>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">My Games</h2>
-
-        <AvatarDropdown
-          title={`Played (${games.played.length})`}
-          games={games.played}
-        />
-
-        <AvatarDropdown
-          title={`Currently Playing (${games.currentlyPlaying.length})`}
-          games={games.currentlyPlaying}
-        />
-
-        <AvatarDropdown
-          title={`Want to Play (${games.wantToPlay.length})`}
-          games={games.wantToPlay}
-        />
-      </div>
-    </div>
+    </ProtectedRoute>
   );
 };
 
