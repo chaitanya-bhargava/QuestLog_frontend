@@ -1,13 +1,11 @@
-// components/ui/ThemeToggleButton.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sun, Moon } from "lucide-react"; // Import icons
+import { Sun, Moon } from "lucide-react";
 
 const ThemeToggleButton = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Check for saved user preference in localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {

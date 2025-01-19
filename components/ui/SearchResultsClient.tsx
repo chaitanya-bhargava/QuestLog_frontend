@@ -33,7 +33,7 @@ const SearchResultsClient = ({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const pageRef = useRef(1);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Ref to store the timeout
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchMoreGames = async () => {
     if (loading || !hasMore) return;
@@ -61,7 +61,7 @@ const SearchResultsClient = ({
   useEffect(() => {
     const handleScroll = () => {
       if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current); // Clear the previous timeout
+        clearTimeout(scrollTimeoutRef.current);
       }
 
       scrollTimeoutRef.current = setTimeout(() => {
@@ -71,22 +71,25 @@ const SearchResultsClient = ({
         if (bottom && hasMore) {
           fetchMoreGames();
         }
-      }, 200); // Adjust the debounce time as needed
+      }, 200);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current); // Clear timeout on cleanup
+        clearTimeout(scrollTimeoutRef.current);
       }
     };
   }, [hasMore]);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold capitalize mb-4">Search Results</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-8">
+      <h1 className="text-4xl font-bold capitalize mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        Search Results
+      </h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {games.map((game) => (
           <GameCard
             key={game.id}
@@ -100,16 +103,16 @@ const SearchResultsClient = ({
               genres: game.genres,
               release_date: game.released,
             }}
-            refreshGames={()=>{
-              
-            }}
+            updateGameShelfStatus={() => {}}
           />
         ))}
       </div>
+
       {loading && <Loader />}
+
       {!hasMore && !loading && (
-        <div className="flex justify-center mt-4">
-          <span>No more games to load.</span>
+        <div className="flex justify-center mt-8">
+          <span className="text-muted-foreground">No more games to load.</span>
         </div>
       )}
     </div>

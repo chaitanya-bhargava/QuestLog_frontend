@@ -1,33 +1,45 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
-import SearchBar from "./SearchBar"; // Import the SearchBar component
-import { Button } from "@/components/ui/button"; // Import the Button component from shadcn
-import { useAuth } from "@/context/AuthContext"; // Import the useAuth hook
+import SearchBar from "./SearchBar";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
-  const { user, loading, login, logout } = useAuth(); // Get auth state and methods
+  const { user, loading, login, logout } = useAuth();
+  const router = useRouter();
 
   return (
-    <nav className="fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-background shadow-sm z-10">
-      <div className="flex-1">LOGO</div>
+    <nav className="fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-background/95 backdrop-blur-sm border-b border-border/50 shadow-lg z-10">
+      <div className="flex-1">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={200}
+            height={40}
+            className="cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            onClick={()=>{
+              router.push("/")
+            }}
+          />
+      </div>
 
       <div className="flex-1 flex justify-center">
-        <SearchBar /> {/* Use the SearchBar component here */}
+        <SearchBar />
       </div>
 
       <div className="flex-1 flex justify-end items-center space-x-4">
         {loading ? (
-          // Show a loading spinner or placeholder while checking auth state
-          <div>Loading...</div>
+          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
         ) : user ? (
-          // If the user is logged in, show the profile avatar and logout button
           <div className="flex items-center space-x-4">
             <Link href="/profile" passHref>
-              <Avatar className="cursor-pointer">
+              <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200">
                 <AvatarImage
-                  src={user.avatar_url || "https://github.com/shadcn.png"} // Use the user's avatar URL if available
+                  src={user.avatar_url || "https://github.com/shadcn.png"}
                   alt="User Avatar"
                 />
                 <AvatarFallback>
@@ -35,13 +47,21 @@ const Navbar = () => {
                 </AvatarFallback>
               </Avatar>
             </Link>
-            <Button variant="outline" onClick={logout}>
+            <Button
+              variant="outline"
+              onClick={logout}
+              className="hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+            >
               Logout
             </Button>
           </div>
         ) : (
-          // If the user is logged out, show the login button
-          <Button onClick={login}>Login with Google</Button>
+          <Button
+            onClick={() => router.push("/login")}
+            className="bg-primary hover:bg-primary/90 transition-colors duration-200"
+          >
+            Login
+          </Button>
         )}
       </div>
     </nav>

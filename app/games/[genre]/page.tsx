@@ -1,10 +1,10 @@
 import GenrePageClient from "@/components/ui/GenrePageClient";
 
 async function getGames(genre: string, page: number) {
-    const response = await fetch(
-      `http://localhost:8080/v1/games?genre=${genre}&page=${page}`
-    );
-    return response.json();
+  const response = await fetch(
+    `http://localhost:8080/v1/games?genre=${genre}&page=${page}`
+  );
+  return response.json();
 }
 
 const GenrePage = async ({
@@ -15,11 +15,13 @@ const GenrePage = async ({
   searchParams: { page?: string };
 }) => {
   const genre = (await params).genre;
-  const page = (await searchParams).page ? parseInt((await searchParams).page || "1") : 1;
+  const page = (await searchParams).page
+    ? parseInt((await searchParams).page || "1")
+    : 1;
 
   const initialData = await getGames(genre, page);
 
-  return <GenrePageClient initialData={initialData} genre={genre}/>;
+  return <GenrePageClient initialData={initialData} genre={genre} />;
 };
 
 export default GenrePage;

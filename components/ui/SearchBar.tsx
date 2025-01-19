@@ -7,8 +7,9 @@ const SearchBar = () => {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      // Redirect to the search page with the query
-      window.location.href = `/games/search?query=${encodeURIComponent(searchQuery)}`;
+      window.location.href = `/games/search?query=${encodeURIComponent(
+        searchQuery
+      )}`;
     }
   };
 

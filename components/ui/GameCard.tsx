@@ -12,6 +12,7 @@ import { ChevronDown, Check } from "lucide-react";
 import { format } from "date-fns";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 type Game = {
   id: number;
@@ -23,14 +24,15 @@ type Game = {
 
 type GameCardProps = {
   game: Game;
-  refreshGames: () => void; // Add refreshGames prop
+  updateGameShelfStatus: (gameId: number, newShelf: string) => void;
 };
 
-const GameCard = ({ game, refreshGames }: GameCardProps) => {
+const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [dropDownOpen, setDropDownOpen] = useState(false);
   const [shelfStatus, setShelfStatus] = useState<string | null>(null);
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchGameLog = async () => {
@@ -58,10 +60,9 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
 
   const handleAddToMyGames = async (status: string) => {
     if (!user) {
-      // ADD logic to navigate to login page
+      router.push("/login");
       return;
     }
-
     try {
       await axios.post(
         "http://localhost:8080/v1/gameLog",
@@ -76,7 +77,7 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
         }
       );
       setShelfStatus(status);
-      refreshGames(); // Call refreshGames to update the parent state
+      updateGameShelfStatus(game.id, status);
     } catch (error) {
       console.error("Error adding game to shelf:", error);
     }
@@ -84,10 +85,9 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
 
   const handleRemoveFromMyGames = async () => {
     if (!user) {
-      // ADD logic to navigate to login page
+      router.push("/login");
       return;
     }
-
     try {
       await axios.delete(
         `http://localhost:8080/v1/gameLog?game_id=${game.id}`,
@@ -97,8 +97,8 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
           },
         }
       );
-      setShelfStatus(null); // Reset shelf status
-      refreshGames(); // Call refreshGames to update the parent state
+      setShelfStatus(null);
+      updateGameShelfStatus(game.id, "NA");
     } catch (error) {
       console.error("Error removing game from shelf:", error);
     }
@@ -113,7 +113,7 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
       case "P":
         return "Played";
       default:
-        return "Want to Play";
+        return "Add to My Games";
     }
   };
 
@@ -127,11 +127,24 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
       }}
     >
       <div className="rounded-lg overflow-hidden">
-        <img
-          src={game.image}
-          alt={game.name}
-          className="w-full h-48 object-cover"
-        />
+        <div className="relative">
+          <img
+            src={game.image}
+            alt={game.name}
+            className="w-full h-48 object-cover"
+          />
+          {isHovered && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
+              <Button
+                variant="default"
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => handleAddToMyGames("W")}
+              >
+                {getButtonText()}
+              </Button>
+            </div>
+          )}
+        </div>
 
         <div className="p-4">
           <div className="h-14 mb-2">
@@ -160,15 +173,22 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleAddToMyGames("W")}>
-                  Want to Play
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddToMyGames("C")}>
-                  Currently Playing
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddToMyGames("P")}>
-                  Played
-                </DropdownMenuItem>
+                {shelfStatus !== "W" && (
+                  <DropdownMenuItem onClick={() => handleAddToMyGames("W")}>
+                    Want To Play
+                  </DropdownMenuItem>
+                )}
+                {shelfStatus !== "C" && (
+                  <DropdownMenuItem onClick={() => handleAddToMyGames("C")}>
+                    Currently Playing
+                  </DropdownMenuItem>
+                )}
+                {shelfStatus !== "P" && (
+                  <DropdownMenuItem onClick={() => handleAddToMyGames("P")}>
+                    Played
+                  </DropdownMenuItem>
+                )}
+
                 {shelfStatus && shelfStatus !== "NA" && (
                   <DropdownMenuItem
                     onClick={handleRemoveFromMyGames}
@@ -200,13 +220,13 @@ const GameCard = ({ game, refreshGames }: GameCardProps) => {
       >
         <div className="p-4 border-t">
           <div className="space-y-2">
-            <p>
+            <p className="text-sm text-muted-foreground">
               <span className="font-semibold">Genres:</span>
               {game.genres.map((genre) => {
                 return <span key={genre.name}>{" " + genre.name}</span>;
               })}
             </p>
-            <p>
+            <p className="text-sm text-muted-foreground">
               <span className="font-semibold">Release Date:</span>{" "}
               {format(game.release_date, "dd-MM-yyyy")}
             </p>
