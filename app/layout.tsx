@@ -37,7 +37,7 @@ export default function RootLayout({
           <div className="flex-1 p-4 ml-64 mt-16">
             <Navbar />
             {children}
-            <ThemeToggleButton/>
+            {/* <ThemeToggleButton/> */}
           </div>
         </div>
         </AuthProvider>

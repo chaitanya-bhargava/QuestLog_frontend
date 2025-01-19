@@ -16,9 +16,10 @@ type Game = {
 type AvatarDropdownProps = {
   title: string;
   games: Game[];
+  refreshGames: () => void; // Add refreshGames prop
 };
 
-const AvatarDropdown = ({ title, games }: AvatarDropdownProps) => {
+const AvatarDropdown = ({ title, games, refreshGames }: AvatarDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -52,6 +53,7 @@ const AvatarDropdown = ({ title, games }: AvatarDropdownProps) => {
                   genres: game.genres,
                   release_date: game.release_date,
                 }}
+                refreshGames={refreshGames} // Pass refreshGames to GameCard
               />
             ))}
           </div>

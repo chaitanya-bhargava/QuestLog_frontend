@@ -100,6 +100,9 @@ const SearchResultsClient = ({
               genres: game.genres,
               release_date: game.released,
             }}
+            refreshGames={()=>{
+              
+            }}
           />
         ))}
       </div>

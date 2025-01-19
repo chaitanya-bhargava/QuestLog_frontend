@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,9 +8,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
-import { format } from 'date-fns';
-
+import { ChevronDown, Check } from "lucide-react";
+import { format } from "date-fns";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 type Game = {
   id: number;
@@ -22,14 +23,98 @@ type Game = {
 
 type GameCardProps = {
   game: Game;
+  refreshGames: () => void; // Add refreshGames prop
 };
 
-const GameCard = ({ game }: GameCardProps) => {
+const GameCard = ({ game, refreshGames }: GameCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [dropDownOpen,setDropDownOpen] = useState(false);
+  const [dropDownOpen, setDropDownOpen] = useState(false);
+  const [shelfStatus, setShelfStatus] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
 
-  const handleAddToMyGames = (status: string) => {
-    console.log(`Added "${game.name}" to "${status}"`);
+  useEffect(() => {
+    const fetchGameLog = async () => {
+      if (user) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/v1/gameLog?game_id=${game.id}`,
+            {
+              headers: {
+                Authorization: `UserID ${user.id}`,
+              },
+            }
+          );
+          if (response.data.shelf !== "NA") {
+            setShelfStatus(response.data.shelf);
+          }
+        } catch (error) {
+          console.error("Error fetching game log:", error);
+        }
+      }
+    };
+
+    fetchGameLog();
+  }, [game.id, user]);
+
+  const handleAddToMyGames = async (status: string) => {
+    if (!user) {
+      // ADD logic to navigate to login page
+      return;
+    }
+
+    try {
+      await axios.post(
+        "http://localhost:8080/v1/gameLog",
+        {
+          game_id: game.id,
+          shelf: status,
+        },
+        {
+          headers: {
+            Authorization: `UserID ${user.id}`,
+          },
+        }
+      );
+      setShelfStatus(status);
+      refreshGames(); // Call refreshGames to update the parent state
+    } catch (error) {
+      console.error("Error adding game to shelf:", error);
+    }
+  };
+
+  const handleRemoveFromMyGames = async () => {
+    if (!user) {
+      // ADD logic to navigate to login page
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `http://localhost:8080/v1/gameLog?game_id=${game.id}`,
+        {
+          headers: {
+            Authorization: `UserID ${user.id}`,
+          },
+        }
+      );
+      setShelfStatus(null); // Reset shelf status
+      refreshGames(); // Call refreshGames to update the parent state
+    } catch (error) {
+      console.error("Error removing game from shelf:", error);
+    }
+  };
+
+  const getButtonText = () => {
+    switch (shelfStatus) {
+      case "W":
+        return "Want to Play";
+      case "C":
+        return "Currently Playing";
+      case "P":
+        return "Played";
+      default:
+        return "Want to Play";
+    }
   };
 
   return (
@@ -37,8 +122,8 @@ const GameCard = ({ game }: GameCardProps) => {
       className="relative w-64 rounded-lg shadow-lg bg-background"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
-        setDropDownOpen(false)
-        setIsHovered(false)
+        setDropDownOpen(false);
+        setIsHovered(false);
       }}
     >
       <div className="rounded-lg overflow-hidden">
@@ -56,31 +141,42 @@ const GameCard = ({ game }: GameCardProps) => {
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => handleAddToMyGames("Want to Play")}
+              onClick={() => handleAddToMyGames("W")}
             >
-              Want to Play
+              {shelfStatus && shelfStatus !== "NA" && (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              {getButtonText()}
             </Button>
 
-            <DropdownMenu modal={false} open={dropDownOpen} onOpenChange={setDropDownOpen}>
+            <DropdownMenu
+              modal={false}
+              open={dropDownOpen}
+              onOpenChange={setDropDownOpen}
+            >
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="w-10">
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => handleAddToMyGames("Want to Play")}
-                >
+                <DropdownMenuItem onClick={() => handleAddToMyGames("W")}>
                   Want to Play
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleAddToMyGames("Currently Playing")}
-                >
+                <DropdownMenuItem onClick={() => handleAddToMyGames("C")}>
                   Currently Playing
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddToMyGames("Played")}>
+                <DropdownMenuItem onClick={() => handleAddToMyGames("P")}>
                   Played
                 </DropdownMenuItem>
+                {shelfStatus && shelfStatus !== "NA" && (
+                  <DropdownMenuItem
+                    onClick={handleRemoveFromMyGames}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    Remove
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -89,14 +185,15 @@ const GameCard = ({ game }: GameCardProps) => {
 
       <div
         className={`absolute left-0 right-0 w-full rounded-b-lg overflow-hidden transition-all duration-300 ease-in-out transform origin-top ${
-          isHovered 
-            ? "opacity-100 translate-y-0 max-h-40" 
+          isHovered
+            ? "opacity-100 translate-y-0 max-h-40"
             : "opacity-0 -translate-y-1 max-h-0"
         }`}
         style={{
           top: "calc(100% - 8px)",
           backgroundColor: "hsl(var(--background))",
-          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+          boxShadow:
+            "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
           zIndex: 10,
           transitionProperty: "transform, opacity, max-height",
         }}
@@ -104,14 +201,14 @@ const GameCard = ({ game }: GameCardProps) => {
         <div className="p-4 border-t">
           <div className="space-y-2">
             <p>
-            <span className="font-semibold">Genres:</span>
-            {game.genres.map((genre)=>{
-              return <span key={genre.name}>{" "+genre.name}</span>
-            })}
+              <span className="font-semibold">Genres:</span>
+              {game.genres.map((genre) => {
+                return <span key={genre.name}>{" " + genre.name}</span>;
+              })}
             </p>
             <p>
               <span className="font-semibold">Release Date:</span>{" "}
-              {format(game.release_date,"dd-MM-yyyy")}
+              {format(game.release_date, "dd-MM-yyyy")}
             </p>
           </div>
         </div>

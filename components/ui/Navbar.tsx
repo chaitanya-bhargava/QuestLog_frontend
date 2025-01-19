@@ -41,7 +41,7 @@ const Navbar = () => {
           </div>
         ) : (
           // If the user is logged out, show the login button
-          <Button onClick={login}>Login</Button>
+          <Button onClick={login}>Login with Google</Button>
         )}
       </div>
     </nav>
