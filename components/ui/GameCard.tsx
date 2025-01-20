@@ -13,7 +13,6 @@ import { format } from "date-fns";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 type Game = {
   id: number;
@@ -32,7 +31,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [dropDownOpen, setDropDownOpen] = useState(false);
   const [shelfStatus, setShelfStatus] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user} = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -129,7 +128,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
     >
       <div className="rounded-lg overflow-hidden">
         <div className="relative">
-          <Image
+          <img
             src={game.image}
             alt={game.name}
             className="w-full h-48 object-cover"

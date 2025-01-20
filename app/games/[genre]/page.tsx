@@ -11,13 +11,15 @@ const GenrePage = async ({
   params,
   searchParams,
 }: {
-  params: { genre: string };
-  searchParams: { page?: string };
+  params: Promise<{ genre: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) => {
-  const genre = (await params).genre;
-  const page = (await searchParams).page
-    ? parseInt((await searchParams).page || "1")
-    : 1;
+  // Await the promises for params and searchParams
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const genre = resolvedParams.genre;
+  const page = resolvedSearchParams.page ? parseInt(resolvedSearchParams.page) : 1;
 
   const initialData = await getGames(genre, page);
 
