@@ -10,7 +10,7 @@ async function getGames(query: string, page: number) {
 const SearchResults = async ({
   searchParams,
 }: {
-  searchParams: { page?: string; query?: string };
+  searchParams: Promise<{ page?: string; query?: string }>;
 }) => {
   const page = (await searchParams).page
     ? parseInt((await searchParams).page || "1")
