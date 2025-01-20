@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 const Navbar = () => {
-  const { user, loading, login, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
 
   return (

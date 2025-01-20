@@ -26,7 +26,7 @@ const ProfilePage = () => {
     currentlyPlaying: [],
     wantToPlay: [],
   });
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const ProfilePage = () => {
           wantToPlay: wantToPlay.data,
         });
       } catch (err) {
-        setError("Failed to fetch games data");
+        setError("Failed to fetch games data: "+err);
       } finally {
         setLoading(false);
       }

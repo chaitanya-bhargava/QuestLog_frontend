@@ -1,4 +1,3 @@
-import GenrePageClient from "@/components/ui/GenrePageClient";
 import SearchResultsClient from "@/components/ui/SearchResultsClient";
 
 async function getGames(query: string, page: number) {
