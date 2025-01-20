@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Gamepad } from "lucide-react";
 
 async function getGenres(): Promise<Genre[]> {
-  const response = await fetch("http://localhost:8080/v1/genres");
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/genres`);
   const data = await response.json();
   return data.data;
 }

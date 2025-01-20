@@ -35,17 +35,17 @@ const ProfilePage = () => {
     const fetchGames = async () => {
       try {
         const [played, currentlyPlaying, wantToPlay] = await Promise.all([
-          axios.get(`http://localhost:8080/v1/games/gameLog?shelf=P`, {
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/games/gameLog?shelf=P`, {
             headers: {
               Authorization: `UserID ${user.id}`,
             },
           }),
-          axios.get(`http://localhost:8080/v1/games/gameLog?shelf=C`, {
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/games/gameLog?shelf=C`, {
             headers: {
               Authorization: `UserID ${user.id}`,
             },
           }),
-          axios.get(`http://localhost:8080/v1/games/gameLog?shelf=W`, {
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/games/gameLog?shelf=W`, {
             headers: {
               Authorization: `UserID ${user.id}`,
             },

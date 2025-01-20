@@ -2,7 +2,7 @@ import GenrePageClient from "@/components/ui/GenrePageClient";
 
 async function getGames(genre: string, page: number) {
   const response = await fetch(
-    `http://localhost:8080/v1/games?genre=${genre}&page=${page}`
+    `${process.env.NEXT_PUBLIC_API_URL}/v1/games?genre=${genre}&page=${page}`
   );
   return response.json();
 }

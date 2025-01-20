@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Check if the user is already logged in
     const checkAuth = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/v1/auth/me`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/auth/me`, {
           withCredentials: true,
         });
         setUser(response.data);
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = () => {
     // Redirect to the backend's Google OAuth endpoint
-    window.location.href = `http://localhost:8080/v1/auth/google?provider=google`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/v1/auth/google?provider=google`;
   };
 
   const logout = async () => {
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Redirect to the home page first
       router.push("/");
       // Perform the logout request
-      await axios.get(`http://localhost:8080/v1/auth/logout?provider=google`, {
+      await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/auth/logout?provider=google`, {
         withCredentials: true, // Include credentials (cookies) if needed
       });
       setUser(null);

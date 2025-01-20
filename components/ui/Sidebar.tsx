@@ -16,7 +16,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     const fetchGenres = async () => {
-      const response = await fetch("http://localhost:8080/v1/genres");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/genres`);
       const data = await response.json();
       setGenres(data.data.reverse());
     };

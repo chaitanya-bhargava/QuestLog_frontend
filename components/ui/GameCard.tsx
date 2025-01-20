@@ -39,7 +39,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
       if (user) {
         try {
           const response = await axios.get(
-            `http://localhost:8080/v1/gameLog?game_id=${game.id}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/v1/gameLog?game_id=${game.id}`,
             {
               headers: {
                 Authorization: `UserID ${user.id}`,
@@ -65,7 +65,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
     }
     try {
       await axios.post(
-        "http://localhost:8080/v1/gameLog",
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/gameLog`,
         {
           game_id: game.id,
           shelf: status,
@@ -90,7 +90,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
     }
     try {
       await axios.delete(
-        `http://localhost:8080/v1/gameLog?game_id=${game.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/gameLog?game_id=${game.id}`,
         {
           headers: {
             Authorization: `UserID ${user.id}`,

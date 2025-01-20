@@ -3,7 +3,7 @@ import SearchResultsClient from "@/components/ui/SearchResultsClient";
 
 async function getGames(query: string, page: number) {
   const response = await fetch(
-    `http://localhost:8080/v1/search?query=${query}&page=${page}`
+    `${process.env.NEXT_PUBLIC_API_URL}/v1/search?query=${query}&page=${page}`
   );
   return response.json();
 }

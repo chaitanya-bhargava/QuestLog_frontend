@@ -40,7 +40,7 @@ const GenrePageClient = ({ initialData, genre }: GenrePageClientProps) => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/v1/games?genre=${genre}&page=${pageRef.current}`
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/games?genre=${genre}&page=${pageRef.current}`
       );
       const data = await response.json();
       if (data.data && data.data.length > 0) {

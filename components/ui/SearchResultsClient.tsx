@@ -43,7 +43,7 @@ const SearchResultsClient = ({
 
     try {
       const response = await fetch(
-        `http://localhost:8080/v1/search?query=${query}&page=${pageRef.current}`
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/search?query=${query}&page=${pageRef.current}`
       );
       const data = await response.json();
       if (data.data && data.data.length > 0) {
