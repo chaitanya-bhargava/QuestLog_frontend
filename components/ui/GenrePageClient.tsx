@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import GameCard from "@/components/ui/GameCard";
+import { useLoading } from "@/context/LoadingContext";
 
 type Game = {
   id: number;
@@ -30,6 +31,7 @@ const GenrePageClient = ({ initialData, genre }: GenrePageClientProps) => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const pageRef = useRef(1);
+  const { setLoadingGenre } = useLoading();
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchMoreGames = async () => {
@@ -80,9 +82,13 @@ const GenrePageClient = ({ initialData, genre }: GenrePageClientProps) => {
     };
   }, [hasMore]);
 
+  useEffect(() => {
+    setLoadingGenre(null);
+  }, [setLoadingGenre]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-8">
-      <h1 className="text-4xl font-bold capitalize mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+    <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-4 md:p-8">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold capitalize mb-6 md:mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         {genre == "role-playing-games-rpg"
           ? "RPG"
           : genre == "board-games"
@@ -92,7 +98,7 @@ const GenrePageClient = ({ initialData, genre }: GenrePageClientProps) => {
           : genre}
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         {games.map((game) => (
           <GameCard
             key={game.id}
@@ -114,8 +120,10 @@ const GenrePageClient = ({ initialData, genre }: GenrePageClientProps) => {
       {loading && <Loader />}
 
       {!hasMore && !loading && (
-        <div className="flex justify-center mt-8">
-          <span className="text-muted-foreground">No more games to load.</span>
+        <div className="flex justify-center mt-6 md:mt-8">
+          <span className="text-sm md:text-base text-muted-foreground">
+            No more games to load.
+          </span>
         </div>
       )}
     </div>

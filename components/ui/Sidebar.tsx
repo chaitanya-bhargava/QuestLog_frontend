@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "./button";
 import { Home, User, Gamepad, List } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLoading } from "@/context/LoadingContext";
 
 type Genre = {
   id: number;
@@ -13,6 +14,7 @@ type Genre = {
 
 const Sidebar = () => {
   const [genres, setGenres] = useState<Genre[]>([]);
+  const { isLoading, loadingGenre, setLoadingGenre } = useLoading();
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -24,8 +26,12 @@ const Sidebar = () => {
     fetchGenres();
   }, []);
 
+  const handleGenreClick = (genreSlug: string) => {
+    setLoadingGenre(genreSlug);
+  };
+
   return (
-    <div className="fixed top-0 left-0 w-64 h-screen bg-background/95 backdrop-blur-sm border-r border-border/50 shadow-lg p-6 flex flex-col space-y-4 mt-24">
+    <div className="hidden md:flex fixed top-0 left-0 w-64 h-screen bg-background/95 backdrop-blur-sm border-r border-border/50 shadow-lg p-6 flex-col space-y-4 mt-24">
       <Link href="/" passHref>
         <Button
           variant="ghost"
@@ -58,8 +64,12 @@ const Sidebar = () => {
                 <Button
                   variant="ghost"
                   className="w-full justify-start px-4 py-2 hover:bg-primary/10 transition-colors duration-200"
+                  onClick={() => handleGenreClick(genre.slug)}
                 >
                   <span className="text-sm">{genre.name}</span>
+                  {loadingGenre === genre.slug && (
+                    <div className="ml-2 w-4 h-4 border-2 border-t-2 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+                  )}
                 </Button>
               </Link>
             </li>

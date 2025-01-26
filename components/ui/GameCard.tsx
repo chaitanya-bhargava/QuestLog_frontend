@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
@@ -31,7 +31,8 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [dropDownOpen, setDropDownOpen] = useState(false);
   const [shelfStatus, setShelfStatus] = useState<string | null>(null);
-  const { user} = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -63,6 +64,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
       router.push("/login");
       return;
     }
+    setIsLoading(true);
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/v1/gameLog`,
@@ -80,6 +82,8 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
       updateGameShelfStatus(game.id, status);
     } catch (error) {
       console.error("Error adding game to shelf:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -88,6 +92,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
       router.push("/login");
       return;
     }
+    setIsLoading(true);
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/v1/gameLog?game_id=${game.id}`,
@@ -101,6 +106,8 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
       updateGameShelfStatus(game.id, "NA");
     } catch (error) {
       console.error("Error removing game from shelf:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,7 +126,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
 
   return (
     <div
-      className="relative w-64 rounded-lg shadow-lg bg-background"
+      className="relative w-full sm:w-64 rounded-lg shadow-lg bg-background"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setDropDownOpen(false);
@@ -139,8 +146,13 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
                 variant="default"
                 className="bg-primary hover:bg-primary/90"
                 onClick={() => handleAddToMyGames("W")}
+                disabled={isLoading}
               >
-                {getButtonText()}
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  getButtonText()
+                )}
               </Button>
             </div>
           )}
@@ -155,11 +167,18 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
               variant="outline"
               className="flex-1"
               onClick={() => handleAddToMyGames("W")}
+              disabled={isLoading}
             >
-              {shelfStatus && shelfStatus !== "NA" && (
-                <Check className="h-4 w-4 mr-2" />
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  {shelfStatus && shelfStatus !== "NA" && (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  {getButtonText()}
+                </>
               )}
-              {getButtonText()}
             </Button>
 
             <DropdownMenu
@@ -168,24 +187,45 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
               onOpenChange={setDropDownOpen}
             >
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="w-10">
+                <Button variant="outline" size="icon" className="w-10" disabled={isLoading}>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {shelfStatus !== "W" && (
-                  <DropdownMenuItem onClick={() => handleAddToMyGames("W")}>
-                    Want To Play
+                  <DropdownMenuItem
+                    onClick={() => handleAddToMyGames("W")}
+                    disabled={isLoading} // Disable dropdown item while loading
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" /> // Show spinner while loading
+                    ) : (
+                      "Want To Play"
+                    )}
                   </DropdownMenuItem>
                 )}
                 {shelfStatus !== "C" && (
-                  <DropdownMenuItem onClick={() => handleAddToMyGames("C")}>
-                    Currently Playing
+                  <DropdownMenuItem
+                    onClick={() => handleAddToMyGames("C")}
+                    disabled={isLoading} // Disable dropdown item while loading
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" /> // Show spinner while loading
+                    ) : (
+                      "Currently Playing"
+                    )}
                   </DropdownMenuItem>
                 )}
                 {shelfStatus !== "P" && (
-                  <DropdownMenuItem onClick={() => handleAddToMyGames("P")}>
-                    Played
+                  <DropdownMenuItem
+                    onClick={() => handleAddToMyGames("P")}
+                    disabled={isLoading} // Disable dropdown item while loading
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" /> // Show spinner while loading
+                    ) : (
+                      "Played"
+                    )}
                   </DropdownMenuItem>
                 )}
 
@@ -193,8 +233,13 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
                   <DropdownMenuItem
                     onClick={handleRemoveFromMyGames}
                     className="text-red-600 focus:text-red-600"
+                    disabled={isLoading} // Disable dropdown item while loading
                   >
-                    Remove
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" /> // Show spinner while loading
+                    ) : (
+                      "Remove"
+                    )}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>

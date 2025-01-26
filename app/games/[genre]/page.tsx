@@ -14,7 +14,6 @@ const GenrePage = async ({
   params: Promise<{ genre: string }>;
   searchParams: Promise<{ page?: string }>;
 }) => {
-  // Await the promises for params and searchParams
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 

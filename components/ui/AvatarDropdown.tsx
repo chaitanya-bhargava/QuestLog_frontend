@@ -30,7 +30,7 @@ const AvatarDropdown = ({
     <div className="mb-4">
       <Button
         variant="outline"
-        className="w-full flex justify-between items-center"
+        className="w-full flex justify-between items-center px-4 py-3 text-sm md:text-base"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{title}</span>
@@ -42,8 +42,8 @@ const AvatarDropdown = ({
       </Button>
 
       {isOpen && (
-        <div className="mt-2 pl-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="mt-2 pl-2 md:pl-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
             {games.map((game) => (
               <GameCard
                 key={game.id}

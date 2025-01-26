@@ -1,4 +1,4 @@
-"use client"; // Mark this as a Client Component
+"use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   useEffect(() => {
-    // Check if the user is already logged in
     const checkAuth = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/auth/me`, {
@@ -43,17 +42,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = () => {
-    // Redirect to the backend's Google OAuth endpoint
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/v1/auth/google?provider=google`;
   };
 
   const logout = async () => {
     try {
-      // Redirect to the home page first
       router.push("/");
-      // Perform the logout request
       await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/auth/logout?provider=google`, {
-        withCredentials: true, // Include credentials (cookies) if needed
+        withCredentials: true, 
       });
       setUser(null);
     } catch (error) {

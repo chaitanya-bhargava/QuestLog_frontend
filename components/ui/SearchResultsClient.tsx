@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import GameCard from "@/components/ui/GameCard";
+import { useLoading } from "@/context/LoadingContext";
 
 type Game = {
   id: number;
@@ -32,8 +34,37 @@ const SearchResultsClient = ({
   const [games, setGames] = useState<Game[]>(initialData.data);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const pageRef = useRef(1);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
+  const { setIsLoading } = useLoading();
+
+  useEffect(() => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
+
+    const fetchInitialGames = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/v1/search?query=${query}&page=1`
+        );
+        const data = await response.json();
+        setGames(data.data);
+        setHasMore(data.data.length > 0);
+        pageRef.current = 1;
+      } catch (error) {
+        console.error("Failed to fetch games:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialGames();
+  }, [query]);
 
   const fetchMoreGames = async () => {
     if (loading || !hasMore) return;
@@ -83,37 +114,49 @@ const SearchResultsClient = ({
     };
   }, [hasMore]);
 
+  useEffect(() => {
+    setIsLoading(false);
+  }, [setIsLoading]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-8">
-      <h1 className="text-4xl font-bold capitalize mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+    <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-4 md:p-8">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold capitalize mb-6 md:mb-8 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         Search Results
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {games.map((game) => (
-          <GameCard
-            key={game.id}
-            game={{
-              id: game.id,
-              name: game.name,
-              image:
-                game.background_image == ""
-                  ? "https://github.com/shadcn.png"
-                  : game.background_image,
-              genres: game.genres,
-              release_date: game.released,
-            }}
-            updateGameShelfStatus={() => {}}
-          />
-        ))}
-      </div>
+      {loading && isInitialLoad ? (
+        <Loader />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {games.map((game) => (
+              <GameCard
+                key={game.id}
+                game={{
+                  id: game.id,
+                  name: game.name,
+                  image:
+                    game.background_image == ""
+                      ? "https://github.com/shadcn.png"
+                      : game.background_image,
+                  genres: game.genres,
+                  release_date: game.released,
+                }}
+                updateGameShelfStatus={() => {}}
+              />
+            ))}
+          </div>
 
-      {loading && <Loader />}
+          {loading && <Loader />}
 
-      {!hasMore && !loading && (
-        <div className="flex justify-center mt-8">
-          <span className="text-muted-foreground">No more games to load.</span>
-        </div>
+          {!hasMore && !loading && (
+            <div className="flex justify-center mt-6 md:mt-8">
+              <span className="text-sm md:text-base text-muted-foreground">
+                No more games to load.
+              </span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -9,8 +9,8 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-cover bg-center">
-      <div className="p-8 bg-background/90 backdrop-blur-sm rounded-lg shadow-xl border border-border/50 max-w-md w-full mx-4">
-        <div className="flex justify-center mb-6">
+      <div className="p-6 md:p-8 bg-background/90 backdrop-blur-sm rounded-lg shadow-xl border border-border/50 max-w-md w-full mx-4">
+        <div className="flex justify-center mb-4 md:mb-6">
           <Image
             src="/logo.png"
             alt="Logo"
@@ -20,11 +20,11 @@ export default function Login() {
           />
         </div>
 
-        <h1 className="text-3xl font-bold text-center mb-6 text-primary">
+        <h1 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-6 text-primary">
           Welcome Back!
         </h1>
 
-        <p className="text-muted-foreground text-center mb-8">
+        <p className="text-sm md:text-base text-muted-foreground text-center mb-6 md:mb-8">
           Sign in to continue to your account.
         </p>
 

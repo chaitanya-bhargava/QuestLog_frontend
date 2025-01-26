@@ -26,7 +26,7 @@ const ProfilePage = () => {
     currentlyPlaying: [],
     wantToPlay: [],
   });
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const ProfilePage = () => {
           wantToPlay: wantToPlay.data,
         });
       } catch (err) {
-        setError("Failed to fetch games data: "+err);
+        setError("Failed to fetch games data: " + err);
       } finally {
         setLoading(false);
       }
@@ -123,7 +123,7 @@ const ProfilePage = () => {
     });
   };
 
-  if (authLoading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-4 border-t-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
@@ -137,46 +137,50 @@ const ProfilePage = () => {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-8 pb-16">
-        <div className="flex items-center space-x-4 p-6 bg-background/90 backdrop-blur-sm rounded-lg shadow-md">
-          <Avatar className="h-16 w-16">
+      <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-4 md:p-8 pb-16">
+        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 p-4 md:p-6 bg-background/90 backdrop-blur-sm rounded-lg shadow-md">
+          <Avatar className="h-12 w-12 md:h-16 md:w-16">
             <AvatarImage src={user?.avatar_url} alt={user?.name} />
             <AvatarFallback>{user?.name[0]}</AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold">{user?.name}</h1>
-            <p className="text-muted-foreground">
+          <div className="text-center md:text-left">
+            <h1 className="text-xl md:text-2xl font-bold">{user?.name}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">
               Welcome back to your profile!
             </p>
           </div>
         </div>
 
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-6">My Games</h2>
+        <div className="mt-6 md:mt-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">My Games</h2>
 
-          <div className="mb-8">
-            <AvatarDropdown
-              title={`Played (${games.played.length})`}
-              games={games.played}
-              updateGameShelfStatus={updateGameShelfStatus}
-            />
-          </div>
+          {!loading && (
+            <>
+              <div className="mb-6 md:mb-8">
+                <AvatarDropdown
+                  title={`Played (${games.played.length})`}
+                  games={games.played}
+                  updateGameShelfStatus={updateGameShelfStatus}
+                />
+              </div>
 
-          <div className="mb-8">
-            <AvatarDropdown
-              title={`Currently Playing (${games.currentlyPlaying.length})`}
-              games={games.currentlyPlaying}
-              updateGameShelfStatus={updateGameShelfStatus}
-            />
-          </div>
+              <div className="mb-6 md:mb-8">
+                <AvatarDropdown
+                  title={`Currently Playing (${games.currentlyPlaying.length})`}
+                  games={games.currentlyPlaying}
+                  updateGameShelfStatus={updateGameShelfStatus}
+                />
+              </div>
 
-          <div className="mb-8">
-            <AvatarDropdown
-              title={`Want to Play (${games.wantToPlay.length})`}
-              games={games.wantToPlay}
-              updateGameShelfStatus={updateGameShelfStatus}
-            />
-          </div>
+              <div className="mb-6 md:mb-8">
+                <AvatarDropdown
+                  title={`Want to Play (${games.wantToPlay.length})`}
+                  games={games.wantToPlay}
+                  updateGameShelfStatus={updateGameShelfStatus}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </ProtectedRoute>

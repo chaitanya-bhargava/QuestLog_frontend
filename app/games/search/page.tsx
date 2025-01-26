@@ -19,7 +19,11 @@ const SearchResults = async ({
 
   const initialData = await getGames(query, page);
 
-  return <SearchResultsClient initialData={initialData} query={query} />;
+  return (
+    <div>
+      <SearchResultsClient initialData={initialData} query={query} />
+    </div>
+  );
 };
 
 export default SearchResults;

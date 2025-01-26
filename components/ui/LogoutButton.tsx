@@ -1,4 +1,4 @@
-"use client"; // Mark this as a Client Component
+"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
