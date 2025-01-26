@@ -37,7 +37,6 @@ const SearchResultsClient = ({
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const pageRef = useRef(1);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const router = useRouter();
   const { setIsLoading } = useLoading();
 
   useEffect(() => {

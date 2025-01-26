@@ -14,7 +14,7 @@ type Genre = {
 
 const Sidebar = () => {
   const [genres, setGenres] = useState<Genre[]>([]);
-  const { isLoading, loadingGenre, setLoadingGenre } = useLoading();
+  const { loadingGenre, setLoadingGenre } = useLoading();
 
   useEffect(() => {
     const fetchGenres = async () => {
