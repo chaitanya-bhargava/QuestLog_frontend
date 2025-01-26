@@ -5,6 +5,7 @@ import { Button } from "./button";
 import { Home, User, Gamepad, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLoading } from "@/context/LoadingContext";
+import { useAuth } from "@/context/AuthContext"; 
 
 type Genre = {
   id: number;
@@ -15,6 +16,7 @@ type Genre = {
 const Sidebar = () => {
   const [genres, setGenres] = useState<Genre[]>([]);
   const { loadingGenre, setLoadingGenre } = useLoading();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -42,15 +44,17 @@ const Sidebar = () => {
         </Button>
       </Link>
 
-      <Link href="/profile" passHref>
-        <Button
-          variant="ghost"
-          className="w-full justify-start px-4 py-2 hover:bg-primary/10 transition-colors duration-200"
-        >
-          <User className="h-5 w-5 mr-3" />
-          <span className="text-sm font-medium">Profile</span>
-        </Button>
-      </Link>
+      {user && (
+        <Link href="/profile" passHref>
+          <Button
+            variant="ghost"
+            className="w-full justify-start px-4 py-2 hover:bg-primary/10 transition-colors duration-200"
+          >
+            <User className="h-5 w-5 mr-3" />
+            <span className="text-sm font-medium">Profile</span>
+          </Button>
+        </Link>
+      )}
 
       <div className="mt-4">
         <h2 className="text-lg font-semibold mb-4 flex items-center">

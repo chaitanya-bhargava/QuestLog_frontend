@@ -118,16 +118,18 @@ const Navbar = () => {
             </Button>
           </Link>
 
-          <Link href="/profile" passHref>
-            <Button
-              variant="ghost"
-              className="w-full justify-start px-4 py-2 hover:bg-primary/10 transition-colors duration-200"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <User className="h-5 w-5 mr-3" />
-              <span className="text-sm font-medium">Profile</span>
-            </Button>
-          </Link>
+          {user && (
+            <Link href="/profile" passHref>
+              <Button
+                variant="ghost"
+                className="w-full justify-start px-4 py-2 hover:bg-primary/10 transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <User className="h-5 w-5 mr-3" />
+                <span className="text-sm font-medium">Profile</span>
+              </Button>
+            </Link>
+          )}
 
           <div className="mt-4">
             <h2 className="text-lg font-semibold mb-4 flex items-center">
