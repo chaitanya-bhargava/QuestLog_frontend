@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLoading } from "@/context/LoadingContext";
 
-const SearchBar = () => {
+type SearchBarProps = {
+  onResultsShown: () => void;
+};
+
+const SearchBar = ({onResultsShown}: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { isLoading, setIsLoading } = useLoading();
   const router = useRouter();
@@ -12,6 +16,7 @@ const SearchBar = () => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && searchQuery.trim()) {
       setIsLoading(true);
+      onResultsShown();
       router.push(`/games/search?query=${encodeURIComponent(searchQuery.trim())}`);
     }
   };

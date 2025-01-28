@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import SearchBar from "./SearchBar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useLoading } from "@/context/LoadingContext";
 import { Menu, X, Home, User, Gamepad, List } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -20,19 +20,30 @@ type Genre = {
 const Navbar = () => {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const { isLoading } = useLoading();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [genres, setGenres] = useState<Genre[]>([]);
 
   useEffect(() => {
     const fetchGenres = async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/genres`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/genres`
+      );
       const data = await response.json();
       setGenres(data.data.reverse());
     };
 
     fetchGenres();
   }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  const handleSearchResultsShown = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -43,7 +54,11 @@ const Navbar = () => {
             size="icon"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </Button>
         </div>
 
@@ -59,7 +74,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex-1 hidden md:flex justify-center">
-          <SearchBar />
+          <SearchBar onResultsShown={handleSearchResultsShown} />
         </div>
 
         <div className="flex-1 hidden md:flex justify-end items-center space-x-4">
@@ -104,7 +119,7 @@ const Navbar = () => {
       >
         <div className="p-6 flex flex-col space-y-4 mt-16">
           <div className="md:hidden">
-            <SearchBar />
+            <SearchBar onResultsShown={handleSearchResultsShown} />
           </div>
 
           <Link href="/" passHref>
