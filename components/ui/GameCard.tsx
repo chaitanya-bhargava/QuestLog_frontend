@@ -8,11 +8,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Check, Loader2 } from "lucide-react";
+import { ChevronDown, Check, Loader2, Star } from "lucide-react";
 import { format } from "date-fns";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Game = {
   id: number;
@@ -32,6 +33,8 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
   const [dropDownOpen, setDropDownOpen] = useState(false);
   const [shelfStatus, setShelfStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [rating, setRating] = useState<number | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -49,6 +52,8 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
           );
           if (response.data.shelf !== "NA") {
             setShelfStatus(response.data.shelf);
+            setRating(response.data.rating || null);
+            setUpdatedAt(response.data.updated_at || null);
           }
         } catch (error) {
           console.error("Error fetching game log:", error);
@@ -71,6 +76,7 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
         {
           game_id: game.id,
           shelf: status,
+          rating: rating || 0,
         },
         {
           headers: {
@@ -103,11 +109,42 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
         }
       );
       setShelfStatus(null);
+      setRating(null);
       updateGameShelfStatus(game.id, "NA");
     } catch (error) {
       console.error("Error removing game from shelf:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRatingClick = async (newRating: number) => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setRating(newRating);
+    if (shelfStatus) {
+      setIsLoading(true);
+      try {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/v1/gameLog`,
+          {
+            game_id: game.id,
+            shelf: shelfStatus,
+            rating: newRating,
+          },
+          {
+            headers: {
+              Authorization: `UserID ${user.id}`,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error updating rating:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -141,7 +178,25 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
             className="w-full h-48 object-cover"
           />
           {isHovered && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center transition-opacity duration-300">
+              <div className="flex items-center gap-1 mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => handleRatingClick(star)}
+                    className="focus:outline-none"
+                    disabled={isLoading}
+                  >
+                    <Star
+                      className={`h-6 w-6 ${
+                        star <= (rating || 0)
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
               <Button
                 variant="default"
                 className="bg-primary hover:bg-primary/90"
@@ -160,8 +215,16 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
 
         <div className="p-4">
           <div className="h-14 mb-2">
-            <h3 className="text-lg font-semibold line-clamp-2">{game.name}</h3>
+            <Link href={`/game/${game.id}`} className="hover:underline">
+              <h3 className="text-lg font-semibold line-clamp-2">{game.name}</h3>
+            </Link>
           </div>
+          {rating && (
+            <div className="flex items-center gap-1 mb-2">
+              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+              <span className="text-sm text-muted-foreground">{rating}/5</span>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -275,6 +338,12 @@ const GameCard = ({ game, updateGameShelfStatus }: GameCardProps) => {
               <span className="font-semibold">Release Date:</span>{" "}
               {format(game.release_date, "dd-MM-yyyy")}
             </p>
+            {updatedAt && (
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold">Updated:</span>{" "}
+                {format(new Date(updatedAt), "dd-MM-yyyy")}
+              </p>
+            )}
           </div>
         </div>
       </div>
