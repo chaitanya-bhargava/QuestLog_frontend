@@ -36,7 +36,7 @@ type GameDetailsClientProps = {
 };
 
 const GameDetailsClient = ({ initialGame }: GameDetailsClientProps) => {
-  const [game, setGame] = useState<Game>(initialGame);
+  const [game] = useState<Game>(initialGame);
   const [shelfStatus, setShelfStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
