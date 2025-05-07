@@ -42,8 +42,8 @@ const AvatarDropdown = ({
       </Button>
 
       {isOpen && (
-        <div className="mt-2 pl-2 md:pl-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+        <div className="mt-2 pl-2 md:pl-4 flex flex-col items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
             {games.map((game) => (
               <GameCard
                 key={game.id}

@@ -45,7 +45,7 @@ const Sidebar = () => {
       </Link>
 
       {user && (
-        <Link href="/profile" passHref>
+        <Link href={`/profile/${user.email.split('@')[0]}`} passHref>
           <Button
             variant="ghost"
             className="w-full justify-start px-4 py-2 hover:bg-primary/10 transition-colors duration-200"

@@ -5,6 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AvatarDropdown from "@/components/ui/AvatarDropdown";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 type Game = {
@@ -17,6 +18,10 @@ type Game = {
 
 const ProfilePage = () => {
   const { user, loading: authLoading } = useAuth();
+  const params = useParams();
+  const router = useRouter();
+  const username = params.username as string;
+  
   const [games, setGames] = useState<{
     played: Game[];
     currentlyPlaying: Game[];
@@ -31,6 +36,15 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (!user) return;
+    
+    // Check if the URL username matches the current user's derived username
+    const currentUsername = user.email.split('@')[0];
+    if (username !== currentUsername) {
+      // For now, redirect to the correct profile
+      // In the future, you could implement viewing other users' profiles
+      router.push(`/profile/${currentUsername}`);
+      return;
+    }
 
     const fetchGames = async () => {
       try {
@@ -65,7 +79,7 @@ const ProfilePage = () => {
     };
 
     fetchGames();
-  }, [user]);
+  }, [user, username, router]);
 
   const updateGameShelfStatus = (gameId: number, newShelf: string) => {
     setGames((prevGames) => {
@@ -187,4 +201,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ProfilePage; 

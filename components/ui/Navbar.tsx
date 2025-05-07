@@ -82,7 +82,7 @@ const Navbar = () => {
             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
           ) : user ? (
             <div className="flex items-center space-x-4">
-              <Link href="/profile" passHref>
+              <Link href={`/profile/${user.email.split('@')[0]}`} passHref>
                 <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200">
                   <AvatarImage
                     src={user.avatar_url || "https://github.com/shadcn.png"}
@@ -134,7 +134,7 @@ const Navbar = () => {
           </Link>
 
           {user && (
-            <Link href="/profile" passHref>
+            <Link href={`/profile/${user.email.split('@')[0]}`} passHref>
               <Button
                 variant="ghost"
                 className="w-full justify-start px-4 py-2 hover:bg-primary/10 transition-colors duration-200"
