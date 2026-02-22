@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AvatarDropdown from "@/components/ui/AvatarDropdown";
-import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import axios from "axios";
 
 type Game = {
@@ -16,12 +15,19 @@ type Game = {
   release_date: string;
 };
 
+type ProfileData = {
+  id: string;
+  name: string;
+  avatar_url: string;
+  username: string;
+};
+
 const ProfilePage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const params = useParams();
-  const router = useRouter();
   const username = params.username as string;
-  
+
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [games, setGames] = useState<{
     played: Game[];
     currentlyPlaying: Game[];
@@ -34,52 +40,46 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
-    
-    // Check if the URL username matches the current user's derived username
-    const currentUsername = user.email.split('@')[0];
-    if (username !== currentUsername) {
-      // For now, redirect to the correct profile
-      // In the future, you could implement viewing other users' profiles
-      router.push(`/profile/${currentUsername}`);
-      return;
-    }
+  const isOwnProfile = user?.username === username;
 
-    const fetchGames = async () => {
+  useEffect(() => {
+    const fetchProfile = async () => {
       try {
+        const profileRes = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/v1/users/${username}/profile`
+        );
+        setProfile(profileRes.data);
+
         const [played, currentlyPlaying, wantToPlay] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/games/gameLog?shelf=P`, {
-            headers: {
-              Authorization: `UserID ${user.id}`,
-            },
-          }),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/games/gameLog?shelf=C`, {
-            headers: {
-              Authorization: `UserID ${user.id}`,
-            },
-          }),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/games/gameLog?shelf=W`, {
-            headers: {
-              Authorization: `UserID ${user.id}`,
-            },
-          }),
+          axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/v1/users/${username}/games?shelf=P`
+          ),
+          axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/v1/users/${username}/games?shelf=C`
+          ),
+          axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/v1/users/${username}/games?shelf=W`
+          ),
         ]);
 
         setGames({
-          played: played.data,
-          currentlyPlaying: currentlyPlaying.data,
-          wantToPlay: wantToPlay.data,
+          played: played.data || [],
+          currentlyPlaying: currentlyPlaying.data || [],
+          wantToPlay: wantToPlay.data || [],
         });
-      } catch (err) {
-        setError("Failed to fetch games data: " + err);
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.status === 404) {
+          setError("Profile not found");
+        } else {
+          setError("Failed to load profile");
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGames();
-  }, [user, username, router]);
+    fetchProfile();
+  }, [username]);
 
   const updateGameShelfStatus = (gameId: number, newShelf: string) => {
     setGames((prevGames) => {
@@ -137,7 +137,7 @@ const ProfilePage = () => {
     });
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-4 border-t-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
@@ -146,59 +146,66 @@ const ProfilePage = () => {
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-muted-foreground">{error}</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            The user you&apos;re looking for doesn&apos;t exist.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-4 md:p-8 pb-16">
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 p-4 md:p-6 bg-background/90 backdrop-blur-sm rounded-lg shadow-md">
-          <Avatar className="h-12 w-12 md:h-16 md:w-16">
-            <AvatarImage src={user?.avatar_url} alt={user?.name} />
-            <AvatarFallback>{user?.name[0]}</AvatarFallback>
-          </Avatar>
-          <div className="text-center md:text-left">
-            <h1 className="text-xl md:text-2xl font-bold">{user?.name}</h1>
-            <p className="text-sm md:text-base text-muted-foreground">
-              Welcome back to your profile!
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 md:mt-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">My Games</h2>
-
-          {!loading && (
-            <>
-              <div className="mb-6 md:mb-8">
-                <AvatarDropdown
-                  title={`Played (${games.played.length})`}
-                  games={games.played}
-                  updateGameShelfStatus={updateGameShelfStatus}
-                />
-              </div>
-
-              <div className="mb-6 md:mb-8">
-                <AvatarDropdown
-                  title={`Currently Playing (${games.currentlyPlaying.length})`}
-                  games={games.currentlyPlaying}
-                  updateGameShelfStatus={updateGameShelfStatus}
-                />
-              </div>
-
-              <div className="mb-6 md:mb-8">
-                <AvatarDropdown
-                  title={`Want to Play (${games.wantToPlay.length})`}
-                  games={games.wantToPlay}
-                  updateGameShelfStatus={updateGameShelfStatus}
-                />
-              </div>
-            </>
-          )}
+    <div className="min-h-screen bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-sm p-4 md:p-8 pb-16">
+      <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 p-4 md:p-6 bg-background/90 backdrop-blur-sm rounded-lg shadow-md">
+        <Avatar className="h-12 w-12 md:h-16 md:w-16">
+          <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+          <AvatarFallback>{profile?.name?.[0]}</AvatarFallback>
+        </Avatar>
+        <div className="text-center md:text-left">
+          <h1 className="text-xl md:text-2xl font-bold">{profile?.name}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            {isOwnProfile
+              ? "Welcome back to your profile!"
+              : `@${profile?.username}`}
+          </p>
         </div>
       </div>
-    </ProtectedRoute>
+
+      <div className="mt-6 md:mt-8">
+        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">
+          {isOwnProfile ? "My Games" : `${profile?.name}'s Games`}
+        </h2>
+
+        <div className="mb-6 md:mb-8">
+          <AvatarDropdown
+            title={`Played (${games.played.length})`}
+            games={games.played}
+            updateGameShelfStatus={updateGameShelfStatus}
+          />
+        </div>
+
+        <div className="mb-6 md:mb-8">
+          <AvatarDropdown
+            title={`Currently Playing (${games.currentlyPlaying.length})`}
+            games={games.currentlyPlaying}
+            updateGameShelfStatus={updateGameShelfStatus}
+          />
+        </div>
+
+        <div className="mb-6 md:mb-8">
+          <AvatarDropdown
+            title={`Want to Play (${games.wantToPlay.length})`}
+            games={games.wantToPlay}
+            updateGameShelfStatus={updateGameShelfStatus}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default ProfilePage; 
+export default ProfilePage;
